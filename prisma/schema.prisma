@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Problem {
+  id           Int    @id @default(autoincrement())
+  title        String
+  description  String
+  requirements String
+
+  attempts Attempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Attempt {
+  id Int @id @default(autoincrement())
+
+  problem   Problem @relation(fields: [problemId], references: [id])
+  problemId Int
+
+  submission Submission?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Submission {
+  id Int @id @default(autoincrement())
+
+  attempt   Attempt @relation(fields: [attemptId], references: [id])
+  attemptId Int     @unique
+
+  requirements String
+  classes      String
+  design       String
+  decisions    String
+  tradeoffs    String
+
+  evaluation Evaluation?
+
+  createdAt DateTime @default(now())
+}
+
+model Evaluation {
+  id Int @id @default(autoincrement())
+
+  submission   Submission @relation(fields: [submissionId], references: [id])
+  submissionId Int        @unique
+
+  status       String
+  overallScore Int
+  feedback     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
