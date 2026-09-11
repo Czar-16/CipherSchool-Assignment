@@ -38,6 +38,27 @@ DesignArena is an interactive Low-Level Design (LLD) practice platform where lea
 
 ---
 
+## Screenshots
+
+Below are screenshots demonstrating the key workflows of the DesignArena application:
+
+### 1. Problem Catalog & Dashboard
+![Problem Catalog](./screenshots/pic1.png)
+
+### 2. Problem Detail & Requirement View
+![Problem Detail](./screenshots/pic2.png)
+
+### 3. Solution Submission Form
+![Solution Submission](./screenshots/pic3.png)
+
+### 4. AI Rubric Evaluation & Detailed Feedback
+![AI Rubric Evaluation](./screenshots/pic4.png)
+
+### 5. Submission History & Attempt Comparison
+![Submission History](./screenshots/pic5.png)
+
+---
+
 ## Evaluation Rubric
 
 Submissions are evaluated out of 60 points across 6 criteria, with each criterion worth 10 points:
@@ -114,6 +135,7 @@ Open `http://localhost:3000` in your browser.
     │   ├── schema.prisma         # Database schema
     │   └── seed.ts               # Initial problem data
     ├── tests/                    # Unit and domain evaluation tests
+    ├── screenshots/              # Application workflow screenshots (pic1.png - pic5.png)
     ├── DESIGN.md                 # System design and architecture document
     ├── RESEARCH.md               # LLD, product and evaluation research
     └── AI_USAGE.md               # AI assistance tracking log
