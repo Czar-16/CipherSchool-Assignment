@@ -10,6 +10,12 @@ interface Problem {
   requirements: string;
 }
 
+interface CriterionScore {
+  criterionId: string;
+  score: number;
+  feedback: string;
+}
+
 interface Evaluation {
   id: number;
   status: "EVALUATING" | "COMPLETED" | "FAILED" | string;
@@ -59,7 +65,8 @@ export default function SubmissionPage({
         }
       } catch (err: unknown) {
         if (!ignore) {
-          const message = err instanceof Error ? err.message : "An error occurred";
+          const message =
+            err instanceof Error ? err.message : "An error occurred";
           setError(message);
         }
       } finally {
@@ -116,6 +123,23 @@ export default function SubmissionPage({
   }
 
   const { problem, evaluation } = submission;
+  // The backend stores feedback as JSON so we can keep
+  // both the overall feedback and individual rubric scores.
+  let parsedFeedback: {
+    feedback?: string;
+    criteriaScores?: CriterionScore[];
+  } = {};
+
+  if (evaluation?.feedback) {
+    try {
+      parsedFeedback = JSON.parse(evaluation.feedback);
+    } catch {
+      // Keep the raw feedback available if older data is not valid JSON.
+      parsedFeedback = {
+        feedback: evaluation.feedback,
+      };
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -183,9 +207,12 @@ export default function SubmissionPage({
               ></path>
             </svg>
             <div>
-              <p className="font-semibold text-sm">Evaluating your submission...</p>
+              <p className="font-semibold text-sm">
+                Evaluating your submission...
+              </p>
               <p className="text-xs mt-0.5 opacity-90">
-                Your submission has been safely saved. Evaluation is in progress.
+                Your submission has been safely saved. Evaluation is in
+                progress.
               </p>
             </div>
           </div>
@@ -202,16 +229,58 @@ export default function SubmissionPage({
               </span>
             </div>
 
-            {evaluation.feedback && (
+            {parsedFeedback.feedback && (
               <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-950">
                 <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 mb-2">
-                  Feedback
+                  Overall Feedback
                 </h3>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300 whitespace-pre-line">
-                  {evaluation.feedback}
+
+                <p className="text-sm leading-6 text-zinc-700 dark:text-zinc-300 whitespace-pre-line">
+                  {parsedFeedback.feedback}
                 </p>
               </div>
             )}
+            {parsedFeedback.criteriaScores &&
+              parsedFeedback.criteriaScores.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+                    Rubric Breakdown
+                  </h3>
+
+                  {parsedFeedback.criteriaScores.map((criterion) => {
+                    const rubricNames: Record<string, string> = {
+                      requirements: "Requirement Understanding",
+                      classes: "Class Responsibilities",
+                      encapsulation: "Encapsulation & Abstraction",
+                      coupling_cohesion: "Coupling & Cohesion",
+                      extensibility: "Extensibility",
+                      edge_cases: "Edge Cases & Testability",
+                    };
+
+                    return (
+                      <div
+                        key={criterion.criterionId}
+                        className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <h4 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100">
+                            {rubricNames[criterion.criterionId] ||
+                              criterion.criterionId}
+                          </h4>
+
+                          <span className="shrink-0 rounded-md bg-indigo-50 px-2.5 py-1 text-sm font-bold text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400">
+                            {criterion.score} / 10
+                          </span>
+                        </div>
+
+                        <p className="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">
+                          {criterion.feedback}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
           </div>
         )}
 
@@ -219,7 +288,8 @@ export default function SubmissionPage({
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-300">
             <p className="font-semibold text-sm">Evaluation Failed</p>
             <p className="text-xs mt-1">
-              {evaluation.feedback || "An error occurred during evaluation. Your submission has been saved safely."}
+              {evaluation.feedback ||
+                "An error occurred during evaluation. Your submission has been saved safely."}
             </p>
           </div>
         )}
